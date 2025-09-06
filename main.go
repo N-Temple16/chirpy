@@ -27,10 +27,10 @@ func handleHealthz (w http.ResponseWriter, r *http.Request) {
 }
 
 func (cfg *apiConfig) handleNumRequests (w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	count := cfg.fileserverHits.Load()
-	body := fmt.Sprintf("Hits: %d\n", count)
-	w.WriteHeader(http.StatusOK)	
+	body := fmt.Sprintf("<html>\n<body>\n<h1>Welcome, Chirpy Admin</h1>\n<p>Chirpy has been visited %d times!</p>\n</body>\n</html>", count)
+	w.WriteHeader(http.StatusOK)
 	w.Write([]byte(body))
 }
 
@@ -49,8 +49,8 @@ func main() {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/healthz", handleHealthz)
-	mux.HandleFunc("GET /api/metrics", apiCfg.handleNumRequests)
-	mux.HandleFunc("POST /api/reset", apiCfg.handleReset)
+	mux.HandleFunc("GET /admin/metrics", apiCfg.handleNumRequests)
+	mux.HandleFunc("POST /admin/reset", apiCfg.handleReset)
 	handler := http.StripPrefix("/app", http.FileServer(http.Dir(filepathRoot)))
 	mux.Handle("/app/", apiCfg.middlewareMetricsInc(handler))
 
